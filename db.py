@@ -1,7 +1,7 @@
 import sqlite3
 
 def db_connection():
-    conn = sqlite3.connect('telegram_bot_users.db')
+    conn = sqlite3.connect('./db/telegram_bot_users.db')
     c = conn.cursor()
     return conn, c
 

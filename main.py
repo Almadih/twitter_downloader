@@ -15,6 +15,8 @@ import time
 from progress_bar import progress
 from dotenv import load_dotenv
 
+from db import init_db,add_or_update_user,get_user_count,add_download,get_downloads_count
+
 load_dotenv()
 bot_token = os.environ.get('BOT_TOKEN')
 workers = 2
@@ -23,17 +25,19 @@ hash = os.environ.get('APP_HASH')
 channel_chat_id = os.environ.get('CHANNEL_ID')
 channel_url = os.environ.get('CHANNEL_URL')
 bot_username = os.environ.get('BOT_USERNAME')
+admin_id = os.environ.get('ADMIN_ID')
 
-print(api)
+init_db()
 app = Client("twitter", bot_token=bot_token, api_id=api, api_hash=hash, workers=workers)
 app.set_parse_mode(enums.ParseMode.MARKDOWN)
 
 
 def is_subscribed(user_id):
     try:
-        app.get_chat_member(channel_chat_id, user_id)
+        res = app.get_chat_member(channel_chat_id, user_id)
         return True
     except Exception as e:
+        print(e)
         return False
 
 def download_twitter_video(url):
@@ -58,11 +62,21 @@ def download_twitter_video(url):
 
 @app.on_message(filters.command('start'))
 def start(client, message):
+    add_or_update_user(message.from_user.id, message.from_user.username, message.from_user.first_name, message.from_user.last_name)
     app.send_message(chat_id=message.from_user.id, text=f"Hello there, I am **X (Twitter) Downloader Bot**.\nI can download any X (Twitter) video from a given link.",reply_markup=InlineKeyboardMarkup(
             [
                 [InlineKeyboardButton("🔔 Subscribe", url=channel_url)]
             ]))
 
+@app.on_message(filters.command('users_count'))
+def users_count(client, message):
+    if message.from_user.id == int(admin_id):
+        app.send_message(chat_id=message.from_user.id, text=f"Total Users : {get_user_count()}")
+    
+@app.on_message(filters.command('downloads_count'))
+def downloads_count(client, message):
+    if message.from_user.id == int(admin_id):
+        app.send_message(chat_id=message.from_user.id, text=f"Total Downloads : {get_downloads_count()}")
 @app.on_message(filters.command('help'))
 def help(client, message):
 
@@ -110,6 +124,7 @@ def download_video(client, message):
                           progress=progress,
                           progress_args=(a, start, title))
         a.delete()
+        add_download(message.from_user.id, file_name)
         try:
             os.unlink(download_path)
         except:

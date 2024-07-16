@@ -4,3 +4,4 @@ tgcrypto
 pymongo[srv]
 python-dotenv
 bs4
+db-sqlite3

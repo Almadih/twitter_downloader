@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 twitter.*
+telegram_bot_users.db

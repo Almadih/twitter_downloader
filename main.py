@@ -3,7 +3,7 @@
 # Encoding = 'utf-8'
 # Fork and Deploy, do not modify this repo and claim it yours
 # For collaboration mail me at dev.jaybee@gmail.com
-from pyrogram import Client, filters,enums
+from pyrogram import Client, filters,enums,utils
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 import requests
 import os
@@ -32,9 +32,22 @@ app = Client("twitter", bot_token=bot_token, api_id=api, api_hash=hash, workers=
 app.set_parse_mode(enums.ParseMode.MARKDOWN)
 
 
+
+def get_peer_type_new(peer_id: int) -> str:
+    peer_id_str = str(peer_id)
+    if not peer_id_str.startswith("-"):
+        return "user"
+    elif peer_id_str.startswith("-100"):
+        return "channel"
+    else:
+        return "chat"
+
+utils.get_peer_type = get_peer_type_new
+
+
 def is_subscribed(user_id):
     try:
-        res = app.get_chat_member(channel_chat_id, user_id)
+        res = app.get_chat_member(int(channel_chat_id), user_id)
         return True
     except Exception as e:
         print(e)

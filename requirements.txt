@@ -1,0 +1,6 @@
+Pyrogram==2.0.106
+requests
+tgcrypto
+pymongo[srv]
+python-dotenv
+bs4
